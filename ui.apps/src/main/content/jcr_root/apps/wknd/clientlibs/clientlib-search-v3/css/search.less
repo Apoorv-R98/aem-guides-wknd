@@ -16,9 +16,14 @@
 
 // WKND OVERLAY (GRANITE-71500): aem-core-wcm-components main's search.less with PR #3069's
 // (GRANITE-71181, branch fix/GRANITE-71181-search-v3-fixes) clear-button diff applied - that PR
-// is still open, so this is a manually-ported diff, not a verbatim copy of a merged commit.
-// Delete this file and its clientlib folder once WKND bumps to a release that includes #3069 -
-// see docs/superpowers/specs/2026-08-05-wknd-contentai-semantic-search-demo-design.md §5.2.
+// is still open, so this is a manually-ported diff, not a verbatim copy of a merged commit. The
+// AI-toggle's checked-state color has also been re-themed to WKND's own brand token
+// (--brandPrimary) to match contentaisearch.js's toggle - see that file's clientlib for the
+// same customization applied there. Delete this file and its clientlib folder once WKND bumps
+// to a release that includes #3069, re-applying the brand-color change as a WKND-only diff on
+// top of whatever core ships - see docs/superpowers/specs/2026-08-05-wknd-contentai-semantic-search-demo-design.md §5.2.
+@wknd-toggle-accent: var(--brandPrimary, #FFEA00);
+@wknd-toggle-focus: var(--brandSecondary, #202020);
 
 .cmp-search {
     position: relative;
@@ -183,7 +188,7 @@
     }
 
     &:checked {
-        background-color: #1473e6;
+        background-color: @wknd-toggle-accent;
 
         &:before {
             transform: translateX(1rem);
@@ -191,7 +196,7 @@
     }
 
     &:focus-visible {
-        outline: .125rem solid #1473e6;
+        outline: .125rem solid @wknd-toggle-focus;
         outline-offset: .125rem;
     }
 }

@@ -13,17 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-// WKND OVERLAY (GRANITE-71500): verbatim copy of aem-core-wcm-components main@774803a74's
-// contentaisearch.less (PR #3068 - GRANITE-70028), which core.wcm.components 2.32.4 predates.
-// Delete this file and its clientlib folder once WKND bumps to a release that includes #3068 -
-// see docs/superpowers/specs/2026-08-05-wknd-contentai-semantic-search-demo-design.md §5.2.
-@summary-accent: #5b2be0;
-@summary-bg: #f4f2ef;
-@card-border: #e2e0dc;
-@text-muted: #666;
+// WKND OVERLAY (GRANITE-71500): started as a verbatim copy of aem-core-wcm-components
+// main@774803a74's contentaisearch.less (PR #3068 - GRANITE-70028), which core.wcm.components
+// 2.32.4 predates - see the js/contentaisearch.js overlay in this same clientlib for that part,
+// which IS still verbatim. This CSS file has since been deliberately re-themed to match WKND's
+// own brand tokens (see ui.frontend/src/main/webpack/base/sass/_variables.scss) - colors, corner
+// radius, and font now pull from the same CSS custom properties WKND's own site styling uses
+// (--brandPrimary, --brandSecondary, --linkColor, --fontFamilySansSerif, etc.), so it is NO
+// LONGER byte-identical to core's file. Keep this in mind when core.wcm.components eventually
+// ships #3068 for real and this overlay gets removed - the color/radius/font changes below are
+// WKND-specific and don't come from upstream, so they'd need to be re-applied as a WKND-only
+// diff on top of whatever core ships, not just deleted wholesale.
+// See docs/superpowers/specs/2026-08-05-wknd-contentai-semantic-search-demo-design.md §5.2.
+@summary-accent-bg: var(--brandPrimary, #FFEA00);
+@summary-accent-text: var(--brandSecondary, #202020);
+@summary-link-color: var(--linkColor, #0045FF);
+@summary-bg: var(--bodyBackground, #F7F7F7);
+@card-border: #EBEBEB;
+@text-muted: #696969;
+@wknd-font-family: var(--fontFamilySansSerif, "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif);
 
 .cmp-contentaisearch {
     position: relative;
+    font-family: @wknd-font-family;
 
     &__field {
         position: relative;
@@ -48,7 +60,7 @@
         }
 
         &:focus {
-            outline: .125rem solid #1473e6;
+            outline: .125rem solid @summary-accent-text;
             outline-offset: -1px;
         }
     }
@@ -84,7 +96,7 @@
         top: .5rem;
         left: .5rem;
         border: 3px solid #ccc;
-        border-top-color: #333;
+        border-top-color: @summary-accent-text;
         border-radius: 50%;
         width: 1rem;
         height: 1rem;
@@ -117,7 +129,7 @@
         cursor: pointer;
         font-size: .875rem;
         line-height: 1.25;
-        color: #464646;
+        color: @summary-accent-text;
         user-select: none;
     }
 
@@ -148,7 +160,7 @@
         }
 
         &:checked {
-            background-color: #1473e6;
+            background-color: @summary-accent-bg;
 
             &:before {
                 transform: translateX(1rem);
@@ -156,7 +168,7 @@
         }
 
         &:focus-visible {
-            outline: .125rem solid #1473e6;
+            outline: .125rem solid @summary-accent-text;
             outline-offset: .125rem;
         }
     }
@@ -179,7 +191,7 @@
     &__summary-loading-indicator {
         flex-shrink: 0;
         border: 3px solid #ccc;
-        border-top-color: @summary-accent;
+        border-top-color: @summary-accent-text;
         border-radius: 50%;
         width: 1.5rem;
         height: 1.5rem;
@@ -204,7 +216,7 @@
 
     &__summary-card {
         padding: 1.25em 1.5em;
-        border-radius: 12px;
+        border-radius: 0;
         background: @summary-bg;
         border: 1px solid @card-border;
     }
@@ -221,7 +233,7 @@
         width: 2rem;
         height: 2rem;
         border-radius: 50%;
-        background: @summary-accent;
+        background: @summary-accent-bg;
         position: relative;
 
         &:before {
@@ -231,7 +243,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #fff;
+            color: @summary-accent-text;
             font-size: .875rem;
         }
     }
@@ -242,7 +254,7 @@
         font-weight: 700;
         letter-spacing: .08em;
         text-transform: uppercase;
-        color: @summary-accent;
+        color: @summary-accent-text;
     }
 
     &__summary-attribution {
@@ -276,7 +288,7 @@
         }
 
         a { /* stylelint-disable-line selector-max-type */
-            color: @summary-accent;
+            color: @summary-link-color;
             text-decoration: underline;
         }
     }
@@ -307,7 +319,7 @@
     &__source-chip {
         display: inline-block;
         padding: .35em .75em;
-        border-radius: 999px;
+        border-radius: 0;
         background: #fff;
         border: 1px solid @card-border;
         font-size: .8125rem;
@@ -315,8 +327,8 @@
         color: inherit;
 
         &:hover {
-            border-color: @summary-accent;
-            color: @summary-accent;
+            border-color: @summary-accent-text;
+            color: @summary-accent-text;
         }
     }
 
@@ -354,7 +366,7 @@
     &__layout-toggle {
         display: inline-flex;
         border: 1px solid @card-border;
-        border-radius: 6px;
+        border-radius: 0;
         overflow: hidden;
     }
 
@@ -363,13 +375,14 @@
         padding: .35em .75em;
         border: 0;
         background: #fff;
+        font-family: inherit;
         font-size: .8125rem;
         cursor: pointer;
         color: inherit;
 
         &[aria-pressed="true"] {
-            background: @summary-accent;
-            color: #fff;
+            background: @summary-accent-bg;
+            color: @summary-accent-text;
         }
     }
 
@@ -378,8 +391,9 @@
         margin: 1em auto 0;
         padding: .4em .9em;
         border: 1px solid @card-border;
-        border-radius: 6px;
+        border-radius: 0;
         background: #fff;
+        font-family: inherit;
         font-size: .875rem;
         cursor: pointer;
 
@@ -421,7 +435,7 @@
         flex-direction: column;
         height: 100%;
         border: 1px solid @card-border;
-        border-radius: 10px;
+        border-radius: 0;
         overflow: hidden;
         background: #fff;
         text-decoration: none;
@@ -490,7 +504,7 @@
         width: 5rem;
         height: 3.5rem;
         object-fit: cover;
-        border-radius: 6px;
+        border-radius: 0;
         background: #eceae6;
     }
 
@@ -507,7 +521,7 @@
     }
 
     &__row:hover &__row-title {
-        color: @summary-accent;
+        color: @summary-link-color;
     }
 
     &__row-description {
