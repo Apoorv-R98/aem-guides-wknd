@@ -1,4 +1,0 @@
-{
-  "baseUrlOverride": "$[env:CONTENT_AI_BASE_URL_OVERRIDE]",
-  "apiKey": "$[secret:CONTENT_AI_API_KEY]"
-}
