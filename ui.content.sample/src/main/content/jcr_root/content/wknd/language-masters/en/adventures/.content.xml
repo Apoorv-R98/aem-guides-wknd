@@ -63,7 +63,6 @@
                 <contentaisearch
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="wknd/components/contentaisearch"
-                    contentSources="[wknd]"
                     resultsLayout="card"
                     resultsSize="{Long}6"
                     placeholder="Search WKND adventures"
