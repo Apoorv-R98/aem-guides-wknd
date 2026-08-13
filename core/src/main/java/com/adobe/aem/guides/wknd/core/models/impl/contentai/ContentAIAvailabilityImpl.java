@@ -71,8 +71,12 @@ public class ContentAIAvailabilityImpl implements ContentAIAvailability {
      * the primary, universally-implemented {@code ConfigurationAdmin} method (unlike the
      * filter-based {@code listConfigurations}, which not every implementation supports). Its
      * documented side effect - creating an empty configuration for the PID if one doesn't exist
-     * yet - is a non-issue here in practice: any real deployment already ships a
-     * {@code ContentAIClientImpl.cfg.json}, so the PID always exists by the time this runs.
+     * yet - is safe regardless of deploy ordering (i.e. even if this runs before a real
+     * {@code ContentAIClientImpl.cfg.json} has landed): per OSGi/Felix semantics, a
+     * {@code Configuration} obtained this way is never persisted and never fires
+     * {@code ManagedService#updated} unless {@code update(...)} is actually called on it - so the
+     * phantom object this creates is inert and cannot interfere with a later real config
+     * deployment, which calls {@code getConfiguration(pid).update(props)} on that same PID.
      */
     private boolean resolveConfigured() {
         if (configurationAdmin == null) {
