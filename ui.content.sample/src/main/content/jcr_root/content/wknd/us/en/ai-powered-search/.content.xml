@@ -30,21 +30,12 @@
                         offset="0"
                         width="12"/>
                 </cq:responsive>
-                <title
-                    jcr:primaryType="nt:unstructured"
-                    sling:resourceType="wknd/components/title"
-                    jcr:title="AI-Powered Search"/>
-                <text
-                    jcr:primaryType="nt:unstructured"
-                    sling:resourceType="wknd/components/text"
-                    text="&lt;p&gt;Search WKND's adventures using semantic (AI-powered) search, backed by AEM Core WCM Components' Content AI integration.&lt;/p&gt;&#xa;"
-                    textIsRich="true"/>
                 <contentaisearch
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="wknd/components/contentaisearch"
                     resultsLayout="card"
                     resultsSize="{Long}6"
-                    placeholder="Search WKND adventures"
+                    placeholder="Search"
                     genSearchToggleVisible="{Boolean}true"
                     genSearchEnabledByDefault="{Boolean}true"
                     genSearchErrorFallback="RESULTS_ONLY"
