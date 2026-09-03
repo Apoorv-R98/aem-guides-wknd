@@ -67,23 +67,16 @@ public class ContentAIAvailabilityImpl implements ContentAIAvailability {
     }
 
     /**
-     * Looks up the {@code ContentAIClientImpl} configuration via {@code getConfiguration(pid)} -
-     * the primary, universally-implemented {@code ConfigurationAdmin} method (unlike the
-     * filter-based {@code listConfigurations}, which not every implementation supports). Its
-     * documented side effect - creating an empty configuration for the PID if one doesn't exist
-     * yet - is safe regardless of deploy ordering (i.e. even if this runs before a real
-     * {@code ContentAIClientImpl.cfg.json} has landed): per OSGi/Felix semantics, a
-     * {@code Configuration} obtained this way is never persisted and never fires
-     * {@code ManagedService#updated} unless {@code update(...)} is actually called on it - so the
-     * phantom object this creates is inert and cannot interfere with a later real config
-     * deployment, which calls {@code getConfiguration(pid).update(props)} on that same PID.
+     * Looks up the {@code ContentAIClientImpl} configuration and reads its {@code apiKey}, going
+     * out of its way to never influence that shared PID's OSGi bundle-location binding along the
+     * way - see {@link #lookupConfiguration()} for why that binding matters here at all.
      */
     private boolean resolveConfigured() {
         if (configurationAdmin == null) {
             return false;
         }
         try {
-            Configuration configuration = configurationAdmin.getConfiguration(CONTENT_AI_CLIENT_PID);
+            Configuration configuration = lookupConfiguration();
             Object apiKey = configuration.getProperties() == null
                     ? null
                     : configuration.getProperties().get(API_KEY_PROPERTY);
@@ -96,6 +89,51 @@ public class ContentAIAvailabilityImpl implements ContentAIAvailability {
             // to "not configured", never break the whole component's rendering via @PostConstruct.
             LOGGER.warn("Unexpected failure determining whether Content AI is configured (PID {})", CONTENT_AI_CLIENT_PID, e);
             return false;
+        }
+    }
+
+    /**
+     * Per OSGi/Felix semantics, {@code ConfigurationAdmin.getConfiguration(pid)} (single-argument
+     * form) has a real side effect beyond "creates an empty in-memory object if none exists yet":
+     * if no {@code ManagedService} is currently registered for the PID at the moment of the call
+     * - whether because none exists yet, or because the real one is mid-restart during a bundle
+     * refresh - it dynamically binds that PID to whichever bundle called it. Since this model can
+     * be instantiated on almost every page render, it can win that race and bind the shared
+     * {@code ContentAIClientImpl} PID to this bundle instead of the one that actually implements
+     * the service - after which Felix stops delivering configuration updates to the real service
+     * entirely, silently breaking Content AI regardless of what's configured.
+     * <p>
+     * The two-argument {@code getConfiguration(pid, location)} form doesn't have that problem:
+     * passing an explicit location - even {@code null}, meaning "not yet bound" - means the call
+     * itself never dynamically binds anything to the caller. That's what this method tries first,
+     * so the production code path never touches bundle-location state at all.
+     * <p>
+     * The only reason for the fallback below is that Sling Mocks' {@code MockConfigurationAdmin}
+     * (which this class's own unit test relies on) doesn't implement the two-argument form -  it
+     * throws {@code UnsupportedOperationException} unconditionally, as does {@code
+     * listConfigurations}, which is why neither is used as the primary lookup. The fallback uses
+     * the single-argument form instead, immediately calling {@code setBundleLocation(null)} to
+     * undo any binding side effect - but only when {@code getProperties() == null}, i.e. only for
+     * a phantom this very call might have just created. A real, already-populated configuration is
+     * never touched there either: unconditionally unbinding it on every render would repeatedly
+     * kick an already-correctly-bound configuration back to unbound, forcing Felix to redo dynamic
+     * bind resolution and redeliver {@code updated(props)} to the real service on every single
+     * page render - on AEMaaCS publish, under real traffic across many pods, that would reopen the
+     * exact kind of churn/race this method exists to avoid, just recurring instead of one-time.
+     */
+    private Configuration lookupConfiguration() throws IOException {
+        try {
+            return configurationAdmin.getConfiguration(CONTENT_AI_CLIENT_PID, null);
+        } catch (UnsupportedOperationException e) {
+            Configuration configuration = configurationAdmin.getConfiguration(CONTENT_AI_CLIENT_PID);
+            if (configuration.getProperties() == null) {
+                try {
+                    configuration.setBundleLocation(null);
+                } catch (UnsupportedOperationException ignored) {
+                    // Expected on ConfigurationAdmin mocks that don't model bundle binding at all.
+                }
+            }
+            return configuration;
         }
     }
 }
