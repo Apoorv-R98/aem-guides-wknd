@@ -29,3 +29,16 @@
 
 <!--/* Favicons */-->
 <sly data-sly-include="favicons.html"></sly>
+
+<!--/* Content Fragment structured data (e.g. adventure difficulty/duration/price) - additive only,
+      renders nothing on pages with no Content Fragment component */-->
+<sly data-sly-use.cf="com.adobe.aem.guides.wknd.core.models.ContentFragmentJsonLd"
+     data-sly-test="${cf.present}">
+    <script type="application/ld+json">${cf.jsonLd @ context='unsafe'}</script>
+    <!--/* Every Content Fragment element as its own plain <meta> tag - confirmed (empirically,
+          against a live Content AI acquisition run) that this carrier works for at least one
+          custom field name where JSON-LD did not. Generic: not hardcoded to any one field. */-->
+    <sly data-sly-list.prop="${cf.allProperties}">
+        <meta name="${prop.name}" content="${prop.value}">
+    </sly>
+</sly>
