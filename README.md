@@ -81,6 +81,21 @@ Setup your local development environment for [AEM as a Cloud Service SDK](https:
 
 ## Notes
 
+### Central Content AI Search
+
+The English shared header uses a single, accessible search-icon link to
+`/content/wknd/us/en/ai-powered-search.html`, replacing the header's inline search
+field. The destination is hidden from automatic navigation to avoid a duplicate
+search entry. It continues to use Content AI Search V1 and its
+**Show AI-generated summary** checkbox; no V2 tabs or Core Components upgrade are
+required.
+
+Deploy the frontend client library, the **Header Search** button style policy,
+and the header content together. When applying content changes manually before
+deploying the client library, the **Header Search** style leaves the button's
+**Search** text visible until the search-icon CSS is available.
+Content AI acquisition sources remain environment-specific author configuration.
+
 ### WKND Sample Content
 
 By default, sample content from `ui.content.sample` will be deployed and installed along with the WKND code base. The WKND reference site is used for demo and training purposes and having a pre-built, fully authored site is useful. However, the behavior of including a full reference site (pages, images, etc...) in source control is *unusual* and is **not** recommended for a real-world implementation.

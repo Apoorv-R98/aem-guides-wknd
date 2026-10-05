@@ -34,19 +34,41 @@ describe('validate the Wknd public site', () => {
     })
   })
 
-  it('search should have search results', () => {
-    // note: cy.origin creates a new context, hence we need to pass the test page as a new argument.
-    // also exception handling is isolated to the new context
-    cy.origin(Cypress.env('AEM_PUBLISH_URL'), () => {
-      cy.on('uncaught:exception', (err) => {
-        if (err.message.includes('Blocked a frame with origin')) {
-          // handle a specific case where contexthub unload makes the test fail when navigating away from the page in the publish instance
-          return false
-        }
+  const viewports = [[1280, 800], [390, 844]]
+  viewports.forEach(([width, height]) => {
+    it(`search link should open the central search page at ${width}px`, () => {
+      cy.origin(Cypress.env('AEM_PUBLISH_URL'), { args: { width, height } }, ({ width, height }) => {
+        cy.on('uncaught:exception', (err) => {
+          if (err.message.includes('Blocked a frame with origin')) {
+            // ContextHub can throw while unloading a cross-origin page.
+            return false
+          }
+        })
+        cy.viewport(width, height)
+        cy.visit('/content/wknd/us/en.html')
+        cy.get('header .cmp-search__field').should('not.exist')
+        cy.get('header nav a[href="/content/wknd/us/en/ai-powered-search.html"]').should('not.exist')
+        cy.get('header a[aria-label="Search"]')
+          .should('have.length', 1)
+          .and('be.visible')
+          .and('have.attr', 'href', '/content/wknd/us/en/ai-powered-search.html')
+        cy.get('header a[aria-label="Search"] .cmp-button__icon').should(($icon) => {
+          const icon = $icon[0]
+          const content = icon.ownerDocument.defaultView.getComputedStyle(icon, '::before').content
+          expect(content).not.to.be.oneOf(['none', 'normal', '""'])
+          const bounds = icon.closest('a').getBoundingClientRect()
+          expect(bounds.width).to.be.at.least(44)
+          expect(bounds.height).to.be.at.least(44)
+          expect(bounds.left).to.be.at.least(0)
+          expect(bounds.right).to.be.at.most(width)
+        })
+        cy.get('header a[aria-label="Search"]').click()
+        cy.location('pathname').should('equal', '/content/wknd/us/en/ai-powered-search.html')
+        cy.get('main .cmp-contentaisearch').should('exist')
+        cy.get('main .cmp-contentaisearch__ai-toggle-input').should('be.checked').uncheck()
+        cy.get('main .cmp-contentaisearch__ai-toggle-input').should('not.be.checked').check()
+        cy.get('main .cmp-contentaisearch__ai-toggle-input').should('be.checked')
       })
-      cy.visit('/')
-      cy.get('.cmp-search__field').type('Climbing')
-      cy.get('.cmp-search__results a').should('have.length.least', 1)
     })
   })
 })
