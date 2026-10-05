@@ -95,6 +95,16 @@ and the header content together. When applying content changes manually before
 deploying the client library, the **Header Search** style leaves the button's
 **Search** text visible until the search-icon CSS is available.
 Content AI acquisition sources remain environment-specific author configuration.
+On desktop, the **Header Search** style groups the 48px search control beside
+the navigation links rather than reserving two grid columns for the icon.
+Mobile/tablet layouts and headers without this style remain unchanged.
+
+Publish the saved header experience fragment, Button policy and central search
+page after authoring changes; deploying code alone does not publish them.
+For development environment 809713, the central page uses the acquisition source
+`dev-wknd-site`. Public-site tests accept canonical and shortened publisher URLs,
+check desktop icon spacing and exercise real V1 results and AI answers with source
+hits. Empty search results are a failure, not a reason to skip the assertion.
 
 ### WKND Sample Content
 
